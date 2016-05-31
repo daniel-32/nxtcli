@@ -1,0 +1,20 @@
+nxtcli
+======
+
+nxtcli is a command-line utility to control a LEGO NXT device attached over Bluetooth, able to execute any command available in the NXT firmware while providing convenient commands for managing files on the NXT. By using the advanced firmware commands, it is possible to play sounds, start and stop programs, read sensor values, control output ports, and send messages to a program running on the NXT (this list is not exhaustive; please consult the list in the manual page to see all available commands).
+
+nxtcli can operate in either interactive or command-line mode. In interactive mode, nxtcli will open the specified device file and use it to communicate with the NXT. nxtcli will then read and process commands interactively until the exit command is entered, whereupon the device file will be closed and nxtcli will terminate. In command-line mode, nxtcli will open the specified device file, execute the command given on the command line, and then close the device file again before terminating.
+
+Motivation
+----------
+
+nxtcli was developed to provide an easy-to-use command-line utility to manage LEGO NXT devices natively from Linux, offering functionality that has so far been available only in graphical applications primarily targetting other operating systems. It provides a convenient "shell" from which to manage an NXT device, and with a command-line mode and an output format that is easily parsable, it can also be integrated into scripts to perform a wide range of tasks.
+
+License
+-------
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>

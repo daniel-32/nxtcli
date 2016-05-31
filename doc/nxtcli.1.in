@@ -1,0 +1,245 @@
+.TH @PACKAGE_NAME@ "1" "2016-05-29" "@PACKAGE_NAME@" "User Commands"
+.\" ============================================================================
+.SH NAME
+@PACKAGE_NAME@ \- control a LEGO NXT device attached over Bluetooth
+
+.\" ============================================================================
+.SH SYNOPSIS
+.B @PACKAGE_NAME@ \fIdevice
+.br
+.B @PACKAGE_NAME@ \fIdevice command \fR[\fIparameter\fR]...
+.br
+
+.\" ============================================================================
+.SH DESCRIPTION
+\fB@PACKAGE_NAME@\fR is a command-line utility to control a LEGO NXT device attached over Bluetooth, able to execute any command available in the NXT firmware while providing convenient commands for managing files on the NXT. By using the advanced firmware commands, it is possible to play sounds, start and stop programs, read sensor values, control output ports, and send messages to a program running on the NXT (this list is not exhaustive; please consult the list in the \fBCOMMANDS\fR section to see all available commands).
+
+\fB@PACKAGE_NAME@\fR can operate in either interactive or command-line mode. In interactive mode, \fB@PACKAGE_NAME@\fR will open the specified device file and use it to communicate with the NXT. \fB@PACKAGE_NAME@\fR will then read and process commands interactively until the \fBexit\fR command is entered, whereupon the device file will be closed and \fB@PACKAGE_NAME@\fR will terminate. In command-line mode, \fB@PACKAGE_NAME@\fR will open the specified device file, execute the command given on the command line, and then close the device file again before terminating.
+
+The first usage format will start \fB@PACKAGE_NAME@\fR in interactive mode, while the second usage format will start \fB@PACKAGE_NAME@\fR in command-line mode.
+
+.\" ============================================================================
+.SH OPTIONS
+.TP
+.I device
+Specify the device file to use to communicate with the NXT.
+
+.TP
+.I command
+Specify the command to execute when running in command-line mode. This may be one of the commands listed in the \fBCOMMANDS\fR section.
+
+.TP
+.I parameter
+Passes a parameter to the command when running in command-line mode. See the documentation for the specific command used for more information on the available parameters.
+
+.\" ============================================================================
+.SH COMMANDS
+Commands are divided into two categories: built-in commands and NXT commands. Built-in commands are commands that are processed internally by \fB@PACKAGE_NAME@\fR and affect \fB@PACKAGE_NAME@\fR itself or are provided to make common NXT tasks easier. NXT commands correspond to the commands supported by the NXT firmware and are passed directly to the NXT.
+
+.\" ----------------------------------------------------------------------------
+.SS "Built-in commands"
+Parameters containing filenames or wildcards may optionally be enclosed in quote marks; this is required if the filename or wildcard contains one or more space characters.
+
+.IP "\fBls \fR[\fIwildcard\fR]"
+Lists files on the NXT. \fIwildcard\fR may take one of the following formats and, if specified, restricts the listing to particular files:
+.RS
+.IP "\fB*.*"
+Matches all files
+.IP "\fB*.ext"
+Matches all files with the extension \fIext\fR
+.IP "\fBfilename.*"
+Matches all files with the name \fIfilename\fR and any extension
+.IP "\fBfilename.ext"
+Matches only the file with the exact name \fIfilename\fR and extension \fIext\fR
+.RE
+
+.IP "\fBget \fIfilename\fR [\fIlocal filename\fR]"
+Uploads a file from the NXT. If \fIlocal filename\fR is specified, this filename will be used locally, otherwise the name of the file as it appears on the NXT will be used.
+
+.IP "\fBput \fIfilename\fR [\fIremote filename\fR] [\fB--mode=\fInormal,linear,data,append\fR] [\fB--freespace=\fIfree-space\fR]"
+Downloads a file to the NXT. If \fIremote file\fR is specified, this filename will be used on the NXT, otherwise the name of the file as it appears locally will be used. \fIremote filename\fR must be a valid NXT filename, and is required if \fIfilename\fR is not a valid NXT filename (otherwise \fB@PACKAGE_NAME@\fR will not have a valid filename to use for the file on the NXT).
+.IP
+\fI--mode\fR specifies the mode to use when creating the file on the NXT, and defaults to \fBnormal\fR if not specified. The following modes are available:
+.RS
+.IP "\fBnormal"
+The file may be fragmented, and no additional data can be added to the file
+.IP "\fBlinear"
+The file will be stored in a contiguous block in the NXT's flash storage (required for program (.rxe) and sound (.rso) files), but no additional data can be added to the file
+.IP "\fBdata"
+The file may be fragmented, but additional data can be added up to the size specified by the \fIfree-space\fR parameter
+.IP "\fBappend"
+Instead of creating a new file, the data is appended to an existing file created using the \fBdata\fR mode (the existing file must have enough free space remaining)
+.RE
+.IP
+\fI--freespace\fR specifies the amount of free space to leave at the end of the file when using the \fBdata\fR mode.
+
+.IP "\fBrm \fIfilename"
+Deletes a file on the NXT.
+
+.IP "\fBhelp \fR[\fIcommand\fR]"
+Lists available commands, or gets additional help on a specific command.
+
+.IP "\fBexit"
+Closes the device file and exits \fB@PACKAGE_NAME@\fR.
+
+.\" ----------------------------------------------------------------------------
+.SS "NXT commands"
+All parameters are always required for NXT commands; if a parameter is not used in a particular situation its value is ignored by the NXT but it is still required. NXT commands always return a response packet, containing at least a status (result) code which is interpreted by \fB@PACKAGE_NAME@\fR when displayed. Some commands return additional values.
+.P
+All values passed to the NXT in parameters and returned by the NXT in responses are of specific types. These types and the formats used to represent them in parameters and responses are as follows:
+.IP \fBboolean
+A single byte, holding either true (-1) or false (0). Represented as either the word "TRUE" or "FALSE" (must be uppercase in parameters).
+.IP \fBubyte
+A single unsigned byte. May hold any value from 0 to 255. Represented as a string of digits in decimal.
+.IP \fBsbyte
+A single signed byte. May hold any value from -128 to 127. Represented as a string of digits in decimal, preceeded by a "-" sign if negative, and optionally preceeded by a "+" sign if positive (in responses the "+" sign is always shown if the value is positive).
+.IP \fBuword
+An unsigned word (two bytes). May hold any value from 0 to 65535. Represented as per \fBubyte\fR; there may be no commas between the digits.
+.IP \fBsword
+A signed word (two bytes). May hold any value from -32768 to 32767. Represented as per \fBsbyte\fR; there may be no commas between the digits.
+.IP \fBulong
+An unsigned long (four bytes). May hold any value from 0 to 4294967296. Represented as per \fBubyte\fR; there may be no commas between the digits.
+.IP \fBslong
+A signed long (four bytes). May hold any value from -2147483648 to 2147483647. Represented as per \fBsbyte\fR; there may be no commas between the digits.
+.IP \fBbytes
+An array of bytes. May be any length. Array is not length-prefixed or null-terminated; length is calculated from the total length of the command or response packet, or is indicated by a separate parameter or response value. In responses, the array is shown as a dump in hexadecimal and ASCII with 16 bytes in two groups of 8 per line and offsets at the start of each line. There is currently no way to pass an array of bytes as a parameter.
+.IP \fBstring
+A null-terminated ASCII string. In parameters, the string may optionally be enclosed in quote marks; this is required if the string contains one or more space characters. In responses, the string is always surrounded by quote marks.
+.IP \fBfilename
+An null-terminated ASCII string of at most 19 characters (20 bytes), in the format of at most 15 characters, a dot, and a 3-character extension (if the first part of the filename is less than 15 characters long, the dot, extension, and null terminator follow straight after). In parameters, the filename may optionally be enclosed in quote marks; this is required if the filename contains one or more space characters. In responses, the filename is always surrounded by quote marks.
+.P
+The available NXT commands are listed below. This is only a summary; the parameter types and any additional response values are not listed here. Please consult the internal documentation with \fBhelp \fIcommand\fR for detailed information.
+
+.IP "\fBStartProgram \fIfilename"
+Starts running a program on the NXT.
+
+.IP "\fBStopProgram"
+Stops the program currently running on the NXT, if any.
+
+.IP "\fBPlaySoundFile \fIloop filename"
+Plays a .rso sound file stored on the NXT.
+
+.IP "\fBPlayTone \fIfrequency duration"
+Generates a tone through the NXT speaker.
+
+.IP "\fBSetOutputState \fIoutput power mode regulation-mode turn-ratio run-state tacho-limit"
+Sets the state of an output (motor) port. Allows for setting of power level, power regulation, and ramp up/down of power level. Can also enable turn ratio and synchronisation between two motors. Motor will optionally be stopped after a specified tacho count.
+
+.IP "\fBSetInputMode \fIport type mode"
+Configures an input (sensor) port for a specified sensor type in a specified mode.
+
+.IP "\fBGetOutputState \fIport"
+Gets the state of an output (motor) port as set by SetOutputState (where applicable, consult the documentation on SetOutputState). Also returns the current state of the motor tacho counter.
+
+.IP "\fBGetInputValues \fIport"
+Reads the value from an input (sensor) port as appropriate for the currently-configured sensor type and mode. Also returns the currently-configured sensor type and mode as set by SetInputMode (where applicable, consult the documentation on SetInputMode).
+
+.IP "\fBResetScaledInputValue \fIport"
+
+.IP "\fBMessageWrite \fImailbox size message"
+Writes a message to the specified mailbox on a slave NXT (as used by programs on the NXT to communicate with other NXTs). May only be used by a master NXT to send messages to slave NXTs.
+
+.IP "\fBResetMotorPosition \fIport relative"
+Resets the tacho counter in a motor.
+
+.IP "\fBGetBatteryLevel"
+Returns the voltage level of the batteries in the NXT.
+
+.IP "\fBStopSoundPlayback"
+Stops all sound playback from the NXT speaker, if any.
+
+.IP "\fBKeepAlive"
+Stops the NXT from entering sleep mode by resetting the sleep timeout counter. Also returns the current sleep timeout as configured by the user.
+
+.IP "\fBLSGetStatus \fIport"
+Gets the number of bytes available to read from a low-speed digital port (a sensor input port configured for "LOWSPEED" or "LOWSPEED_9V" sensor types and used for communication with digital sensors).
+
+.IP "\fBLSWrite \fIport tx-length rx-length tx-data"
+Writes to a low-speed digital port (a sensor input port configured for "LOWSPEED" or "LOWSPEED_9V" sensor types and used for communication with digital sensors). Rx data length is required in the write command as reading from the device is done on a master-slave basis.
+
+.IP "\fBLSRead \fIport"
+Reads bytes from a low-speed digital port (a sensor input port configured for "LOWSPEED" or "LOWSPEED_9V" sensor types and used for communication with digital sensors).
+
+.IP "\fBGetCurrentProgramName"
+Returns the name of the program currently running on the NXT, if any. If no program is currently running, an error will be returned in the "Status" field and the "File name" field will be zero-filled.
+
+.IP "\fBMessageRead \fIremote-mailbox local-mailbox remove"
+Reads a message from the specified mailbox on a slave NXT (as used by programs on the NXT to communicate with other NXTs). Optionally removes message from remote mailbox. Slave NXTs may not initiate communication with a master, so they store outgoing messages in mailboxes 10 - 19 until the master retrieves them. May only be used by a master NXT to retrieve messages from slave NXTs.
+
+.IP "\fBOpenRead \fIfilename"
+Opens a file on the NXT for reading. The returned handle is used in subsequent Read commands and must be closed with the Close command when no longer needed (if the NXT returns an error when working with the handle, the handle is closed automatically).
+
+.IP "\fBOpenWrite \fIfilename size"
+Opens a file on the NXT for writing. The file must not already exist. The returned handle is used in subsequent Write commands and must be closed with the Close command when no longer needed (if the NXT returns an error while working with the handle, the handle is closed automatically).
+
+.IP "\fBRead \fIhandle length"
+Reads from an open file handle as opened by the OpenRead command.
+
+.IP "\fBWrite \fIhandle data"
+Writes to an open file handle as opened by the OpenWrite, OpenWriteLinear, OpenWriteData, and OpenAppendData commands.
+
+.IP "\fBClose \fIhandle"
+Closes an open file handle.
+
+.IP "\fBDelete \fIfilename"
+Deletes a file on the NXT.
+
+.IP "\fBFindFirst \fIfilename"
+Finds the first file on the NXT matching the file name or wildcard specified in the "File name" field and returns information about it. If there are no matching files, a file not found error is returned in the "Status" field. Also returns a handle which can be used with subsequent FindNext commands to find subsequent files matching the "File name" field. The returned handle must be closed with the Close command when no longer needed (if the NXT returns an error when working with the handle, the handle is closed automatically, except if the error is the file not found error returned if there are no more matching files whereupon the handle should be closed manually).
+
+.IP "\fBFindNext \fIhandle"
+Finds the next file matching the file name or wildcard given when the specified handle was opened and returns information about it. If there are no more matching files, a file not found error is returned in the "Status" field.
+
+.IP "\fBGetFirmwareVersion"
+Returns the version numbers of the NXT firmware and communication protocol. In both cases, backward-compatible changes result in an increment of the minor version number and backward-incompatible changes result in an increment of the major version number.
+
+.IP "\fBOpenWriteLinear \fIfilename size"
+Opens a file on the NXT for writing, which will be stored in a contiguous block in the NXT's flash storage. The file must not already exist. The returned handle is used in subsequent Write commands and must be closed with the Close command when no longer needed (if the NXT returns an error while working with the handle, the handle is closed automatically).
+
+.IP "\fBOpenWriteData \fIfilename size"
+Opens a file on the NXT for writing, which can be written to again later by opening it with the OpenAppendData command. The file must not already exist. The returned handle is used in subsequent Write commands and must be closed with the Close command when no longer needed (if the NXT returns an error while working with the handle, the handle is closed automatically).
+
+.IP "\fBOpenAppendData \fIfilename"
+Opens a file on the NXT for writing. The file must have been created with the OpenWriteData command, and the data written will be appended to the end of the file. The returned handle is used in subsequent Write commands and must be closed with the Close command when no longer needed (if the NXT returns an error while working with the handle, the handle is closed automatically).
+
+.IP "\fBSetBrickName \fIname"
+Sets the name of the NXT, as shown in the status bar on the NXT's display and used to identify the NXT over Bluetooth.
+
+.IP "\fBGetDeviceInfo"
+Returns various information about the NXT.
+
+.\" ============================================================================
+.SH EXAMPLES
+Connect interactively to an NXT deivce attached to /dev/rfcomm0.
+.RS
+@PACKAGE_NAME@ /dev/rfcomm0
+.RE
+
+Retrieve a listing of all program (.rxe) files on an NXT device attached to /dev/rfcomm0.
+.RS
+@PACKAGE_NAME@ /dev/rfcomm0 ls *.rxe
+.RE
+The wildcard may need to be enclosed in quote marks to prevent shell wildcard expansion.
+.RS
+@PACKAGE_NAME@ /dev/rfcomm0 ls "*.rxe"
+.RE
+
+Download a program file named foo.rxe to an NXT device attached to /dev/rfcomm0, giving it the name bar.rxe on the NXT.
+.RS
+@PACKAGE_NAME@ /dev/rfcomm0 put foo.rxe bar.rxe --mode=linear
+.RE
+
+Gets the battery level of an NXT device attached to /dev/rfcomm0.
+.RS
+@PACKAGE_NAME@ /dev/rfcomm0 GetBatteryLevel
+.RE
+
+.\" ============================================================================
+.SH BUGS
+There is currently no way to pass an array of bytes as a parameter to an NXT command.
+
+Please report bugs at \fBhttps://github.com/daniel-32/nxtcli/issues\fR.
+
+.\" ============================================================================
+.SH SEE ALSO
+\fBrfcomm\fR(1)

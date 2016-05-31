@@ -1,0 +1,417 @@
+<nxtcommands>
+	<!-- Direct commands -->
+	<command name="StartProgram" value="0x00">
+		<description>Starts running a program on the NXT.</description>
+		<parameters>
+			<parameter name="File name" type="filename"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="StopProgram" value="0x01">
+		<description>Stops the program currently running on the NXT, if any.</description>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="PlaySoundFile" value="0x02">
+		<description>Plays a .rso sound file stored on the NXT.</description>
+		<parameters>
+			<parameter name="Loop" type="boolean"/>
+			<parameter name="File name" type="filename"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="PlayTone" value="0x03">
+		<description>Generates a tone through the NXT speaker.</description>
+		<parameters>
+			<parameter name="Frequency" type="uword"><description>Frequency of the tone (Hz)</description></parameter>
+			<parameter name="Duration" type="uword"><description>Duration of the tone (ms)</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="SetOutputState" value="0x04">
+		<description>Sets the state of an output (motor) port. Allows for setting of power level, power regulation, and ramp up/down of power level. Can also enable turn ratio and synchronisation between two motors. Motor will optionally be stopped after a specified tacho count.</description>
+		<parameters>
+			<parameter name="Output port" type="ubyte"><description>Range: 0 - 2; 0xFF is a special value meaning all ports</description></parameter>
+			<parameter name="Motor power" type="sbyte"><description>Range: -100 - 100</description></parameter>
+			<parameter name="Mode" type="ubyte"><description>Bit-field:
+MOTORON     0x01    Turn on the specified motor
+BRAKE       0x02    Use run/brake instead of run/float in PWM
+REGULATED   0x04    Turns on the regulation</description></parameter>
+			<parameter name="Regulation mode" type="ubyte"><description>Enumeration:
+REGULATION_MODE_IDLE        0x00    No regulation will be enabled
+REGULATION_MODE_MOTOR_SPEED 0x01    Power control will be enabled
+REGULATION_MODE_MOTOR_SYNC  0x02    Synchronisation will be enabled (needs to be enabled on two outputs)</description></parameter>
+			<parameter name="Turn ratio" type="sbyte"><description>Percentage ratio used when turning (range: -100 - 100)</description></parameter>
+			<parameter name="Run state" type="ubyte"><description>Enumeration:
+MOTOR_RUN_STATE_IDLE        0x00    Output will be idle
+MOTOR_RUN_STATE_RAMPUP      0x10    Output will ramp up
+MOTOR_RUN_STATE_RUNNING     0x20    Output will be running
+MOTOR_RUN_STATE_RAMPDOWN    0x40    Output will ramp down</description></parameter>
+			<parameter name="Tacho limit" type="ulong"><description>Tacho count after which motor will stop (0 is a special value meaning run forever)</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="SetInputMode" value="0x05">
+		<description>Configures an input (sensor) port for a specified sensor type in a specified mode.</description>
+		<parameters>
+			<parameter name="Input port" type="ubyte"><description>Range: 0 - 3</description></parameter>
+			<parameter name="Type" type="ubyte"><description>Enumeration:
+NO_SENSOR           0x00
+SWITCH              0x01
+TEMPERATURE         0x02
+REFLECTION          0x03
+ANGLE               0x04
+LIGHT_ACTIVE        0x05
+LIGHT_INACTIVE      0x06
+SOUND_DB            0x07
+SOUND_DBA           0x08
+CUSTOM              0x09
+LOWSPEED            0x0A
+LOWSPEED_9V         0x0B
+NO_OF_SENSOR_TYPES  0x0C</description></parameter>
+			<parameter name="Mode" type="ubyte"><description>Enumeration:
+RAWMODE             0x00
+BOOLEANMODE         0x20
+TRANSITIONCNTMODE   0x40
+PERIODCOUNTERMODE   0x60
+PCTFULLSCALEMODE    0x80
+CELSIUSMODE         0xA0
+FAHRENHEITMODE      0xC0
+ANGLESTEPSMODE      0xE0
+SLOPEMASK           0x1F
+MODEMASK            0xE0</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="GetOutputState" value="0x06">
+		<description>Gets the state of an output (motor) port as set by SetOutputState (where applicable, consult the documentation on SetOutputState). Also returns the current state of the motor tacho counter.</description>
+		<parameters>
+			<parameter name="Output port" type="ubyte"><description>Range: 0 - 2</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Output port" type="ubyte"/>
+			<response name="Motor power" type="sbyte"/>
+			<response name="Mode" type="ubyte"/>
+			<response name="Regulation mode" type="ubyte"/>
+			<response name="Turn ratio" type="sbyte"/>
+			<response name="Run state" type="ubyte"/>
+			<response name="Tacho limit" type="ulong"><description>Current limit on a movement in progress, if any</description></response>
+			<response name="Tacho count" type="slong"><description>Number of counts since last reset of the motor counter</description></response>
+			<response name="Block tacho count" type="slong"><description>Current position relative to last programmed movement</description></response>
+			<response name="Rotation count" type="slong"><description>Current position relative to last reset of the rotation sensor for this motor</description></response>
+		</responses>
+	</command>
+	<command name="GetInputValues" value="0x07">
+		<description>Reads the value from an input (sensor) port as appropriate for the currently-configured sensor type and mode. Also returns the currently-configured sensor type and mode as set by SetInputMode (where applicable, consult the documentation on SetInputMode).</description>
+		<parameters>
+			<parameter name="Input port" type="ubyte"><description>Range: 0 - 3</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Input port" type="ubyte"/>
+			<response name="Valid" type="boolean"><description>TRUE if new data value should be seen as valid data</description></response>
+			<response name="Calibrated" type="boolean"><description>TRUE if calibration file found and used for "Calibrated value" field</description></response>
+			<response name="Type" type="ubyte"/>
+			<response name="Mode" type="ubyte"/>
+			<response name="Raw value" type="uword"/>
+			<response name="Normalized value" type="uword"><description>Normalised A/D value (range: 0 - 1023)</description></response>
+			<response name="Scaled value" type="sword"/>
+			<response name="Calibrated value" type="sword"><description>Value scaled according to calibration</description></response>
+		</responses>
+	</command>
+	<command name="ResetScaledInputValue" value="0x08">
+		<parameters>
+			<parameter name="Input port" type="ubyte"><description>Range: 0 - 3</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="MessageWrite" value="0x09">
+		<description>Writes a message to the specified mailbox on a slave NXT (as used by programs on the NXT to communicate with other NXTs). May only be used by a master NXT to send messages to slave NXTs.</description>
+		<parameters>
+			<parameter name="Mailbox" type="ubyte"><description>Range: 0 - 9</description></parameter>
+			<parameter name="Size" type="ubyte"/>
+			<parameter name="Message" type="string"><description>Message data is treated as a string; it must include null termination to be accepted - accordingly, the "Size" field must include the null termination byte</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="ResetMotorPosition" value="0x0A">
+		<description>Resets the tacho counter in a motor.</description>
+		<parameters>
+			<parameter name="Output port" type="ubyte"><description>Range: 0 - 2</description></parameter>
+			<parameter name="Relative" type="boolean"><description>TRUE: position relative to last movement; FALSE: absolute position</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="GetBatteryLevel" value="0x0B">
+		<description>Returns the voltage level of the batteries in the NXT.</description>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Voltage" type="uword"><description>Battery voltage (mv)</description></response>
+		</responses>
+	</command>
+	<command name="StopSoundPlayback" value="0x0C">
+		<description>Stops all sound playback from the NXT speaker, if any.</description>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="KeepAlive" value="0x0D">
+		<description>Stops the NXT from entering sleep mode by resetting the sleep timeout counter. Also returns the current sleep timeout as configured by the user.</description>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Sleep time (ms)" type="ulong"><description>Current sleep timeout (ms)</description></response>
+		</responses>
+	</command>
+	<command name="LSGetStatus" value="0x0E">
+		<description>Gets the number of bytes available to read from a low-speed digital port (a sensor input port configured for "LOWSPEED" or "LOWSPEED_9V" sensor types and used for communication with digital sensors).</description>
+		<parameters>
+			<parameter name="Port" type="ubyte"><description>Range: 0 - 3</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Available bytes" type="ubyte"><description>Count of available bytes to read</description></response>
+		</responses>
+	</command>
+	<command name="LSWrite" value="0x0F">
+		<description>Writes to a low-speed digital port (a sensor input port configured for "LOWSPEED" or "LOWSPEED_9V" sensor types and used for communication with digital sensors). Rx data length is required in the write command as reading from the device is done on a master-slave basis.</description>
+		<parameters>
+			<parameter name="Port" type="ubyte"><description>Range: 0 - 3</description></parameter>
+			<parameter name="Tx length" type="ubyte"/>
+			<parameter name="Rx length" type="ubyte"/>
+			<parameter name="Tx data" type="bytes"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="LSRead" value="0x10">
+		<description>Reads bytes from a low-speed digital port (a sensor input port configured for "LOWSPEED" or "LOWSPEED_9V" sensor types and used for communication with digital sensors).</description>
+		<parameters>
+			<parameter name="Port" type="ubyte"><description>Range: 0 - 3</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Bytes read" type="ubyte"/>
+			<response name="Rx data" type="bytes"><description>Received data is always zero-padded to a length of 16 bytes; the actual number of bytes received is in the "Bytes read" field</description></response>
+		</responses>
+	</command>
+	<command name="GetCurrentProgramName" value="0x11">
+		<description>Returns the name of the program currently running on the NXT, if any. If no program is currently running, an error will be returned in the "Status" field and the "File name" field will be zero-filled.</description>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="File name" type="filename"/>
+		</responses>
+	</command>
+	<command name="MessageRead" value="0x13">
+		<description>Reads a message from the specified mailbox on a slave NXT (as used by programs on the NXT to communicate with other NXTs). Optionally removes message from remote mailbox. Slave NXTs may not initiate communication with a master, so they store outgoing messages in mailboxes 10 - 19 until the master retrieves them. May only be used by a master NXT to retrieve messages from slave NXTs.</description>
+		<parameters>
+			<parameter name="Remote mailbox" type="ubyte"><description>Remote mailbox number (range: 0 - 19)</description></parameter>
+			<parameter name="Local mailbox" type="ubyte"><description>Local mailbox number (range: 0 - 9)</description></parameter>
+			<parameter name="Remove" type="boolean"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Local inbox" type="ubyte"><description>Local mailbox number (range: 0 - 9)</description></response>
+			<response name="Size" type="ubyte"/>
+			<response name="Message" type="string" length="59"><description>Message is a null-terminated string zero-padded to a length of 59 bytes; the actual length of the message is in the "Size" field, including the terminating null byte</description></response>
+		</responses>
+	</command>
+	<!-- System commands -->
+	<command name="OpenRead" value="0x80">
+		<description>Opens a file on the NXT for reading. The returned handle is used in subsequent Read commands and must be closed with the Close command when no longer needed (if the NXT returns an error when working with the handle, the handle is closed automatically).</description>
+		<parameters>
+			<parameter name="File name" type="filename"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+			<response name="File size" type="ulong"><description>If the file was created with OpenWriteData, the file size returned is the amount of data in the file, not the total space reserved for the file</description></response>
+		</responses>
+	</command>
+	<command name="OpenWrite" value="0x81">
+		<description>Opens a file on the NXT for writing. The file must not already exist. The returned handle is used in subsequent Write commands and must be closed with the Close command when no longer needed (if the NXT returns an error while working with the handle, the handle is closed automatically).</description>
+		<parameters>
+			<parameter name="File name" type="filename"/>
+			<parameter name="File size" type="ulong"><description>Amount of storage space to allocate to the file; the file cannot exceed this size</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="Read" value="0x82">
+		<description>Reads from an open file handle as opened by the OpenRead command.</description>
+		<parameters>
+			<parameter name="Handle" type="ubyte"/>
+			<parameter name="Length" type="uword"><description>Number of bytes to read</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+			<response name="Bytes read" type="uword"/>
+			<response name="Data" type="bytes"><description>Read data is always zero-padded to the requested length; the actual number of bytes read is in the "Bytes read" field (note that reading past the end of the file isn't reflected by the "Bytes read" field but is indicated by the "Status" field)</description></response>
+		</responses>
+	</command>
+	<command name="Write" value="0x83">
+		<description>Writes to an open file handle as opened by the OpenWrite, OpenWriteLinear, OpenWriteData, and OpenAppendData commands.</description>
+		<parameters>
+			<parameter name="Handle" type="ubyte"/>
+			<parameter name="Data" type="bytes"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+			<response name="Bytes written" type="uword"/>
+		</responses>
+	</command>
+	<command name="Close" value="0x84">
+		<description>Closes an open file handle.</description>
+		<parameters>
+			<parameter name="Handle" type="ubyte"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="Delete" value="0x85">
+		<description>Deletes a file on the NXT.</description>
+		<parameters>
+			<parameter name="File name" type="filename"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="File name" type="filename"/>
+		</responses>
+	</command>
+	<command name="FindFirst" value="0x86">
+		<description>Finds the first file on the NXT matching the file name or wildcard specified in the "File name" field and returns information about it. If there are no matching files, a file not found error is returned in the "Status" field. Also returns a handle which can be used with subsequent FindNext commands to find subsequent files matching the "File name" field. The returned handle must be closed with the Close command when no longer needed (if the NXT returns an error when working with the handle, the handle is closed automatically, except if the error is the file not found error returned if there are no more matching files whereupon the handle should be closed manually).</description>
+		<parameters>
+			<parameter name="File name" type="filename"><description>This may contain either a file name, in which case only the file with that exact name will be returned (if it exists), or it may contain a wildcard in one of the following formats:
+*.*         Matches all files
+*.ext       Matches all files with the extension "ext"
+filename.*  Matches all files with the name "filename" and any extension</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+			<response name="File name" type="filename"><description>Name of the first matching file</description></response>
+			<response name="File size" type="ulong"><description>Size of the first matching file</description></response>
+		</responses>
+	</command>
+	<command name="FindNext" value="0x87">
+		<description>Finds the next file matching the file name or wildcard given when the specified handle was opened and returns information about it. If there are no more matching files, a file not found error is returned in the "Status" field.</description>
+		<parameters>
+			<parameter name="Handle" type="ubyte"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+			<response name="File name" type="filename"><description>Name of the next matching file</description></response>
+			<response name="File size" type="ulong"><description>Size of the next matching file</description></response>
+		</responses>
+	</command>
+	<command name="GetFirmwareVersion" value="0x88">
+		<description>Returns the version numbers of the NXT firmware and communication protocol. In both cases, backward-compatible changes result in an increment of the minor version number and backward-incompatible changes result in an increment of the major version number.</description>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Protocol minor version" type="ubyte"/>
+			<response name="Protocol major version" type="ubyte"/>
+			<response name="Firmware minor version" type="ubyte"/>
+			<response name="Firmware major version" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="OpenWriteLinear" value="0x89">
+		<description>Opens a file on the NXT for writing, which will be stored in a contiguous block in the NXT's flash storage. The file must not already exist. The returned handle is used in subsequent Write commands and must be closed with the Close command when no longer needed (if the NXT returns an error while working with the handle, the handle is closed automatically).</description>
+		<parameters>
+			<parameter name="File name" type="filename"/>
+			<parameter name="File size" type="ulong"><description>Amount of storage space to allocate to the file; the file cannot exceed this size - if the NXT's storage is fragmented, this command may fail even if enough free space is available as indicated by the GetDeviceInfo command</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+		</responses>
+	</command>
+	<!-- OpenReadLinear (0x8A) omitted -->
+	<command name="OpenWriteData" value="0x8B">
+		<description>Opens a file on the NXT for writing, which can be written to again later by opening it with the OpenAppendData command. The file must not already exist. The returned handle is used in subsequent Write commands and must be closed with the Close command when no longer needed (if the NXT returns an error while working with the handle, the handle is closed automatically).</description>
+		<parameters>
+			<parameter name="File name" type="filename"/>
+			<parameter name="File size" type="ulong"><description>Amount of storage space to allocate to the file; the file cannot exceed this size, even when re-opened with the OpenAppendData command</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="OpenAppendData" value="0x8C">
+		<description>Opens a file on the NXT for writing. The file must have been created with the OpenWriteData command, and the data written will be appended to the end of the file. The returned handle is used in subsequent Write commands and must be closed with the Close command when no longer needed (if the NXT returns an error while working with the handle, the handle is closed automatically).</description>
+		<parameters>
+			<parameter name="File name" type="filename"/>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="Handle" type="ubyte"/>
+			<response name="Available file size" type="ulong"><description>Available space for appending data - this is determined by the size allocated when the file was created and the amount of data already in the file</description></response>
+		</responses>
+	</command>
+	<!-- Boot (0x97) omitted -->
+	<command name="SetBrickName" value="0x98">
+		<description>Sets the name of the NXT, as shown in the status bar on the NXT's display and used to identify the NXT over Bluetooth.</description>
+		<parameters>
+			<parameter name="Name" type="string" length="16"><description>Maximum length: 15 characters</description></parameter>
+		</parameters>
+		<responses>
+			<response name="Status" type="ubyte"/>
+		</responses>
+	</command>
+	<command name="GetDeviceInfo" value="0x9B">
+		<description>Returns various information about the NXT.</description>
+		<responses>
+			<response name="Status" type="ubyte"/>
+			<response name="NXT name" type="string" length="15"><description>Name of the NXT, as shown in the status bar on the NXT's display and used to identify the NXT over Bluetooth</description></response>
+			<response name="Bluetooth address" type="bytes" length="7"/>
+			<response name="Bluetooth signal strength" type="ulong"/>
+			<response name="Free user flash" type="ulong"><description>Number of available bytes in the NXT's flash storage</description></response>
+		</responses>
+	</command>
+	<!-- commands 0xA? omitted -->
+</nxtcommands>
+
+<!--
+
+	NXT_CMD_OPENREAD = 0x80,
+	NXT_CMD_OPENWRITE = 0x81,
+	NXT_CMD_READ = 0x82,
+	NXT_CMD_WRITE = 0x83,
+	NXT_CMD_CLOSE = 0x84,
+	NXT_CMD_DELETE = 0x85,
+	NXT_CMD_FINDFIRST = 0x86,
+	NXT_CMD_FINDNEXT = 0x87,
+	NXT_CMD_FIRMWAREVERSION = 0x88,
+	// some commands omitted
+	NXT_CMD_BOOT = 0x97,
+	NXT_CMD_SETNAME = 0x98,
+	NXT_CMD_GETINFO = 0x9B,
+
+	NXT_CMD_DELETEUSERFLASH = 0xA0,
+
+-->
