@@ -1,7 +1,7 @@
 Installation Instructions
 =========================
 
-The latest nxtcli sources can be obtained at <https://github.com/daniel-32/nxtcli> and the latest source release at <https://github.com/daniel-32/nxtcli/releases/latest>.
+The latest nxtcli sources can be obtained at <https://github.com/danielmeek32/nxtcli> and the latest source release at <https://github.com/danielmeek32/nxtcli/releases/latest>.
 
 Prerequisities
 --------------
@@ -9,7 +9,7 @@ Prerequisities
 nxtcli has the following dependencies:
 *   libreadline
 *   libxml-2.0
-*   libnxtbt (obtainable from <https://github.com/daniel-32/libnxtbt>)
+*   libnxtbt (obtainable from <https://github.com/danielmeek32/libnxtbt>)
 
 Please make sure that these are installed (including development header files) before attempting to compile nxtcli.
 

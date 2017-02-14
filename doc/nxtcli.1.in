@@ -238,7 +238,7 @@ Gets the battery level of an NXT device attached to /dev/rfcomm0.
 .SH BUGS
 There is currently no way to pass an array of bytes as a parameter to an NXT command.
 
-Please report bugs at \fBhttps://github.com/daniel-32/nxtcli/issues\fR.
+Please report bugs at \fBhttps://github.com/danielmeek32/nxtcli/issues\fR.
 
 .\" ============================================================================
 .SH SEE ALSO
